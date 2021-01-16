@@ -35,7 +35,7 @@ export default new Router({
         },{
           path: '/Shu',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shu.vue'),
-          meta: { title: '商品管理' }
+          meta: { title: '属性管理' }
         }
 
       ]
