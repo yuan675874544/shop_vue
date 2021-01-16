@@ -40,7 +40,7 @@
             label="操作">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit"   @click="toUpdateshuxing(scope.row.sid)"></el-button>
-              <el-button type="danger" icon="el-icon-delete"  @click="deleteShuxing(scope.row.sid)"></el-button>
+              <el-button type="danger" icon="el-icon-delete"  @click="deleteIsdel(scope.row.sid)"></el-button>
             </template>
           </el-table-column>
 
@@ -74,7 +74,28 @@
             typeData:[],
             leixngData:[{type:0,name:"下拉框"},{type:1,name:"单选框"},{type:2,name:"复选框"},{type:3,name:"输入框"}],
           }
-      },methods:{
+      },methods:{//逻辑删除
+        deleteIsdel(sid){
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$ajax.post("http://127.0.0.1:8080/ShuController/deleteIsdel?sid="+sid+"").then(res=>{
+            // 把请求的数据  赋给全局
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+            this.queryShuXing(1);
+          }).catch(err=>console.log(err));
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
         queryShuXing:function (current,size) {
           this.param.current = current;
           this.param.size = size;
