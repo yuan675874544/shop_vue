@@ -1,12 +1,14 @@
 <template>
-    <div>
+    <div >
       <h1>属性展示</h1>
+      <button type="success" @click="addFormFlag=true">新增</button>
       <div id="shuTable">
+
         <el-table
           :data="shuxingData"
           style="width: 100%">
           <el-table-column
-            prop="id"
+            prop="sid"
             label="序号"
             width="180">
           </el-table-column>
@@ -56,6 +58,54 @@
           :total="totalPage">
         </el-pagination>
       </div>
+      <div>
+        <!--新增模板-->
+        <el-dialog title="属性新增信息" :visible.sync="addFormFlag">
+          <el-form :model="addForm" ref="addForm"  label-width="80px">
+            <el-form-item label="英文名称" prop="name">
+              <el-input v-model="addForm.name" autocomplete="off" ></el-input>
+            </el-form-item>
+            <el-form-item label="中文名称" prop="nameCH">
+              <el-input v-model="addForm.nameCH" autocomplete="off" ></el-input>
+            </el-form-item>
+            <el-form-item label="属性类型" prop="typeId">
+              <el-select v-model="addForm.typeId" placeholder="请选择">
+                <el-option
+                  v-for="item in bandData"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="类型" prop="type">
+              <el-select v-model="addForm.type" placeholder="请选择">
+                <el-option
+                  v-for="item in leixngData"
+                  :key="item.type"
+                  :label="item.name"
+                  :value="item.type">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="SKU" prop="isSKU">
+              <el-switch
+                v-model="addForm.isSKU"
+                active-text="是"
+                active-color="#13ce66"
+                :active-value="1"
+                inactive-text="否"
+                :inactive-value="0">
+              </el-switch>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="add">确 定</el-button>
+            <el-button @click="addFormFlag = false">取 消</el-button>
+          </div>
+        </el-dialog>
+      </div>
+
     </div>
 </template>
 
@@ -73,8 +123,29 @@
             //类型的数据
             typeData:[],
             leixngData:[{type:0,name:"下拉框"},{type:1,name:"单选框"},{type:2,name:"复选框"},{type:3,name:"输入框"}],
+            /* 新增模块的数据  */
+            bandData:[],
+            addFormFlag:false,
+            addForm:{
+              id:"",
+              name:"",
+              nameCH:"",
+              typeId:"",
+              type:"",
+              isSKU:""
+            },
           }
-      },methods:{//逻辑删除
+      },methods:{
+        add(){
+          console.log(this.addForm)
+          var add=this.$qs.stringify(this.addForm)
+          this.$ajax.post("http://127.0.0.1:8080/ShuController/add?"+add).then(res=>{
+            // 把请求的数据  赋给全局
+            this.addFormFlag=false;
+            this.queryShuXing(1,4);
+          }).catch(err=>console.log(err));
+        },
+          //逻辑删除
         deleteIsdel(sid){
         this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -87,7 +158,7 @@
               type: 'success',
               message: '删除成功!'
             });
-            this.queryShuXing(1);
+            this.queryShuXing(1,4);
           }).catch(err=>console.log(err));
         }).catch(() => {
           this.$message({
