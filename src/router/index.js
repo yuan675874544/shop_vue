@@ -32,6 +32,10 @@ export default new Router({
           path: '/Pin',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Pin.vue'),
           meta: { title: '商品管理' }
+        },{
+          path: '/Shu',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shu.vue'),
+          meta: { title: '商品管理' }
         }
 
       ]

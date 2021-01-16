@@ -7,29 +7,29 @@
       accordion
 
     >
-      <span class="custom-tree-node" slot-scope="{ node, data }">
-  <span>{{ node.label }}</span>
-  <span>
-    <el-button
-      type="text"
-      size="mini"
-@click="() => addForms( data)">
-      新增
-    </el-button>
-    <el-button
-      type="text"
-      size="mini"
-      @click="() => remove(node, data)">
-      删除
-    </el-button>
-    <el-button
-      type="text"
-      size="mini"
-      @click="() => update(data)">
-      修改
-    </el-button>
-  </span>
-</span>
+              <span class="custom-tree-node" slot-scope="{ node, data }">
+          <span>{{ node.label }}</span>
+          <span>
+            <el-button
+              type="text"
+              size="mini"
+        @click="() => addForms( data)">
+              新增
+            </el-button>
+            <el-button
+              type="text"
+              size="mini"
+              @click="() => remove(node, data)">
+              删除
+            </el-button>
+            <el-button
+              type="text"
+              size="mini"
+              @click="() => update(data)">
+              修改
+            </el-button>
+          </span>
+        </span>
 
     </el-tree>
     <!--新增的弹框-->

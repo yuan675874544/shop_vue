@@ -72,9 +72,11 @@ export default {
                   },{
                     index: 'Pin',
                     title: '商品管理'
+                  },{
+                    index: 'Shu',
+                    title: '属性管理'
                   }
                   ]
-
               },
                 {
                     icon: 'el-icon-lx-calendar',
