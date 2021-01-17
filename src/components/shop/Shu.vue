@@ -192,8 +192,26 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-button type="primary" @click="addValueFormAalg=true">新增</el-button>
     </el-dialog>
+    <!--属性值新增的的模板-->
 
+    <div>
+      <el-dialog title="属性值新增信息" :visible.sync="addValueFormAalg">
+        <el-form :model="addValueForm"    label-width="80px">
+          <el-form-item label="英文名称" prop="name">
+            <el-input v-model="addValueForm.name" autocomplete="off" ></el-input>
+          </el-form-item>
+          <el-form-item label="中文名称" prop="nameCH">
+            <el-input v-model="addValueForm.nameCH" autocomplete="off" ></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="addValue">确 定</el-button>
+          <el-button @click="addValueFormFlag = false">取 消</el-button>
+        </div>
+      </el-dialog>
+    </div>
     </div>
 
 </template>
@@ -241,7 +259,13 @@
             showValueFormFlag:false,
               name:"",
               nameCh:"",
-              attId:""
+              attId:"",
+            //属性值新增的数据
+            addValueFormAalg:false,
+            addValueForm:{
+              name:"",
+              nameCH:"",
+            },
           }
       },methods:{
 
@@ -363,6 +387,7 @@
         queryValue:function(attId){
           //请求数据
           debugger
+          this.attId=attId;
           this.showValueFormFlag=true;
           var bthis = this;
           this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attId+"").then(function (rs) {
@@ -383,6 +408,7 @@
                 type: 'success',
                 message: '删除成功!'
               });
+              athis.queryValue(this.attId)
             }).catch(err=>console.log(err));
           }).catch(() => {
             this.$message({
@@ -390,6 +416,17 @@
               message: '已取消删除'
             });
           });
+        },
+        addValue(){
+          alert(this.attId)
+        this.addValueForm.attId=this.attId;
+          var add=this.$qs.stringify(this.addValueForm)
+          var athis=this;
+          this.$ajax.post("http://127.0.0.1:8080/ShuValueController/add?"+add).then(res=>{
+            // 把请求的数据  赋给全局
+            athis.addValueFormFlag=false;
+            athis.queryValue(this.attId)
+          }).catch(err=>console.log(err));
         }
       }, created:function () {
         this.queryType();
