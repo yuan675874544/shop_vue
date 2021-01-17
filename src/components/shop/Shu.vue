@@ -185,10 +185,11 @@
           width="180">
         </el-table-column>
         <el-table-column
-          prop="id"
+          prop="vid"
           label="操作">
           <template slot-scope="scope">
             <el-button type="danger" icon="el-icon-delete"  @click="deleteAttid(scope.row.vid)"></el-button>
+            <el-button type="primary" icon="el-icon-edit"   @click="toUpdateshuxingValue(scope.row.vid)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -209,6 +210,23 @@
         <div slot="footer" class="dialog-footer">
           <el-button type="primary" @click="addValue">确 定</el-button>
           <el-button @click="addValueFormFlag = false">取 消</el-button>
+        </div>
+      </el-dialog>
+    </div>
+    <!--属性值修改的模板-->
+    <div>
+      <el-dialog title="属性值修改信息" :visible.sync="updateValueFormFlag">
+        <el-form :model="updateValueForm"    label-width="80px">
+          <el-form-item label="英文名称" prop="name">
+            <el-input v-model="updateValueForm.name" autocomplete="off" ></el-input>
+          </el-form-item>
+          <el-form-item label="中文名称" prop="nameCH">
+            <el-input v-model="updateValueForm.nameCH" autocomplete="off" ></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="updateValue">确 定</el-button>
+          <el-button @click="updateValueFormFlag = false">取 消</el-button>
         </div>
       </el-dialog>
     </div>
@@ -266,6 +284,12 @@
               name:"",
               nameCH:"",
             },
+            //属性值修改的数据
+            updateValueFormFlag:false,
+            updateValueForm:{
+             name:"",
+             nameCH:""
+            }
           }
       },methods:{
 
@@ -408,7 +432,7 @@
                 type: 'success',
                 message: '删除成功!'
               });
-              athis.queryValue(this.attId)
+              this.queryValue(this.attId)
             }).catch(err=>console.log(err));
           }).catch(() => {
             this.$message({
@@ -427,7 +451,14 @@
             athis.addValueFormFlag=false;
             athis.queryValue(this.attId)
           }).catch(err=>console.log(err));
-        }
+        },
+        //回显
+    toUpdateshuxingValue(vid){
+      this.updateValueFormFlag=true;
+      this.$ajax.get("http://127.0.0.1:8080/ShuValueController/getDataByid?vid="+vid+"").then(res=>{
+        this.updateValueForm=res.data.data;
+      }).catch(err=>console.log(err));
+    },
       }, created:function () {
         this.queryType();
         this.queryShuXing(1,4);
