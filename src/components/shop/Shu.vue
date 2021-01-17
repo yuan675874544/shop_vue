@@ -1,7 +1,14 @@
 <template>
-    <div >
+  <div align="center">
       <h1>属性展示</h1>
-      <button type="success" @click="addFormFlag=true">新增</button>
+      <div style="width: 200px" >
+        <el-form>
+          名称:<el-input type="text" v-model="param.name" width="40px "></el-input>
+          <el-button v-on:click="queryShuXing(1,4)">搜索</el-button>
+          <h1 align="center" >商品管理</h1>
+          <el-button type="success" @click="addFormFlag=true">新增</el-button>
+        </el-form>
+      </div>
       <div id="shuTable">
 
         <el-table
@@ -11,6 +18,11 @@
             prop="sid"
             label="序号"
             width="180">
+          </el-table-column>
+          <el-table-column
+            prop="typeId"
+            label="类型"
+            :formatter="formaTypeId">
           </el-table-column>
           <el-table-column
             prop="name"
@@ -24,11 +36,7 @@
           >
           </el-table-column>
 
-          <el-table-column
-            prop="typeId"
-            label="类型"
-            :formatter="formaTypeId">
-          </el-table-column>
+
 
           <el-table-column
             prop="isSKU"
@@ -43,6 +51,7 @@
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit"   @click="toUpdateshuxing(scope.row.sid)"></el-button>
               <el-button type="danger" icon="el-icon-delete"  @click="deleteIsdel(scope.row.sid)"></el-button>
+              <el-button type="danger" icon="el-icon-delete" @click= "queryValue(scope.row.sid)">属性值维护</el-button>
             </template>
           </el-table-column>
 
@@ -68,13 +77,13 @@
             <el-form-item label="中文名称" prop="nameCH">
               <el-input v-model="addForm.nameCH" autocomplete="off" ></el-input>
             </el-form-item>
-            <el-form-item label="属性类型" prop="typeId">
+            <el-form-item label="分类" prop="typeId">
               <el-select v-model="addForm.typeId" placeholder="请选择">
                 <el-option
                   v-for="item in bandData"
-                  :key="item.id"
+                  :key="item.iid"
                   :label="item.name"
-                  :value="item.id">
+                  :value="item.iid">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -114,7 +123,7 @@
           <el-form-item label="中文名称" prop="nameCH">
             <el-input v-model="updateForm.nameCH" autocomplete="off" ></el-input>
           </el-form-item>
-          <el-form-item label="属性类型" prop="typeId">
+          <el-form-item label="分类" prop="typeId">
             <el-select v-model="updateForm.typeId" placeholder="请选择">
               <el-option
                 v-for="item in bandData"
@@ -150,7 +159,36 @@
           <el-button @click="updateFormFlag = false">取 消</el-button>
         </div>
       </el-dialog>
+    <!--这是属性展示的模板-->
+    <el-dialog title="属性展示模板" :visible.sync="showValueFormFlag">
+      <el-table
+        :data="valueData"
+        style="width: 100%">
+        <el-table-column
+          prop="vid"
+          label="序号"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="属性英文名称"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="nameCH"
+          label="属性中文文名称"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="attId"
+          label="属性值id"
+          width="180">
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+
     </div>
+
 </template>
 
 <script>
@@ -158,11 +196,14 @@
         name: "Shu",
       data(){
           return{
+            arr:"",
             totalPage: 0,//总条数
             pageSizes: [5, 10, 15, 20],//每页展示几条
             current: 1,  //当前也
             size: 5, //每页展示条数
-            param:{},
+            param:{
+              name:""
+            },
             shuxingData:[],
             //类型的数据
             typeData:[],
@@ -188,8 +229,15 @@
               type:"",
               isSKU:""
             },
+            //属性值维护的模板
+            valueData:[],
+            showValueFormFlag:false,
+              name:"",
+              nameCh:"",
+              attId:""
           }
       },methods:{
+
         update: function () {
           debugger
           var athis = this;
@@ -243,7 +291,6 @@
         queryShuXing:function (current,size) {
           this.param.current = current;
           this.param.size = size;
-
           //请求数据
           var bthis = this;
           this.$ajax.post("http://127.0.0.1:8080/ShuController/queryShuData", this.$qs.stringify(this.param)).then(function (rs) {
@@ -256,10 +303,10 @@
           hthis.queryData(val, hthis.param.size);
         },
         handleSizeChange(val) {
-
           var sthis = this;
           sthis.queryData(1, val);
-        },   formaTypeId(row,column,value,index){
+        },
+        formaTypeId(row,column,value,index){
           for (let i = 0; i <this.typeData.length; i++) {
             if(value==this.typeData[i].id)
             {return this.typeData[i].name}
@@ -269,18 +316,17 @@
           return value==1?"是":"否"
         },queryType(){
           this.$ajax.get("http://127.0.0.1:8080/TypeController/getData").then(res=>{
-            this.typeData=res.data.data;
-            for (let i = 0; i <res.data.data.length ; i++) {
-              if(res.data.data[i].pid==0){
-                this.diguiNode(res.data.data[i]);
+            this.typeData=res.data.data.data;
+            for (let i = 0; i <res.data.data.data.length ; i++) {
+              if(res.data.data.data[i].pid==0){
+                this.diguiNode(res.data.data.data[i]);
                 break;
               }
             }
           }).catch(err=>console.log(err));
-        },     diguiNode:function (node) {
+        },diguiNode:function (node) {
           // 判断是否为父节点
           var bf=this.isParent(node);
-          console.log(bf)
           if(bf==true){
             for (let i = 0; i <this.typeData.length ; i++) {
               //判断是否为当前节点的子节点
@@ -290,11 +336,15 @@
             }
           }
           if(bf==false){
-            console.log(node)
-            this.bandData.push(node)
-          }
-        },
-        isParent:function(node){// 判断是否为父节点  pid 有没有指向当前id
+            for (let i = 0; i <this.typeData.length ; i++) {
+              if(node.pid==this.typeData[i].id){
+                this.arr='{"id":'+node.id+',"name":'+'"分类/'+this.typeData[i].name+"/"+node.name+'"'+'}';
+                this.bandData.push(JSON.parse(this.arr))
+              }
+            }
+          }        },
+        isParent:function(node){
+          // 判断是否为父节点  pid 有没有指向当前id
           for (let i = 0; i <this.typeData.length ; i++) {
             if(node.id==this.typeData[i].pid){
               console.log(1)
@@ -302,10 +352,21 @@
             }
           }
           return false;
+        },
+        queryValue:function(attId){
+          //请求数据
+          debugger
+          this.showValueFormFlag=true;
+          var bthis = this;
+          this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attId+"").then(function (rs) {
+            //属性值数据
+            bthis.valueData = rs.data.data;
+          })
         }
       }, created:function () {
         this.queryType();
         this.queryShuXing(1,4);
+        this.queryValue(attId);
       }
     }
 </script>
