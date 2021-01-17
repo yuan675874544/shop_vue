@@ -105,7 +105,51 @@
           </div>
         </el-dialog>
       </div>
-
+      <!--修改模板-->
+      <el-dialog title="属性修改信息" :visible.sync="updateFormFlag">
+        <el-form :model="updateForm" ref="updateForm"  label-width="80px">
+          <el-form-item label="英文名称" prop="name">
+            <el-input v-model="updateForm.name" autocomplete="off" ></el-input>
+          </el-form-item>
+          <el-form-item label="中文名称" prop="nameCH">
+            <el-input v-model="updateForm.nameCH" autocomplete="off" ></el-input>
+          </el-form-item>
+          <el-form-item label="属性类型" prop="typeId">
+            <el-select v-model="updateForm.typeId" placeholder="请选择">
+              <el-option
+                v-for="item in bandData"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="类型" prop="type">
+            <el-select v-model="updateForm.type" placeholder="请选择">
+              <el-option
+                v-for="item in leixngData"
+                :key="item.type"
+                :label="item.name"
+                :value="item.type">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="SKU" prop="isSKU">
+            <el-switch
+              v-model="updateForm.isSKU"
+              active-text="是"
+              active-color="#13ce66"
+              :active-value="1"
+              inactive-text="否"
+              :inactive-value="0">
+            </el-switch>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="update">确 定</el-button>
+          <el-button @click="updateFormFlag = false">取 消</el-button>
+        </div>
+      </el-dialog>
     </div>
 </template>
 
@@ -127,7 +171,17 @@
             bandData:[],
             addFormFlag:false,
             addForm:{
-              id:"",
+              sid:"",
+              name:"",
+              nameCH:"",
+              typeId:"",
+              type:"",
+              isSKU:""
+            },
+            //修改的模板
+            updateFormFlag:false,
+            updateForm:{
+              sid:"",
               name:"",
               nameCH:"",
               typeId:"",
@@ -136,6 +190,25 @@
             },
           }
       },methods:{
+        update: function () {
+          debugger
+          var athis = this;
+          //发起请求
+          this.$ajax.post("http://127.0.0.1:8080/ShuController/update",this.$qs.stringify(this.updateForm)).then(function () {
+            alert("修改成功");
+            athis.updateFormFlag = false;
+            athis.queryShuXing(1,5);
+          }).catch(function () {
+            console.log("发送请求失败");
+          })
+        },
+        //回显
+        toUpdateshuxing(sid){
+          this.updateFormFlag=true;
+          this.$ajax.get("http://127.0.0.1:8080/ShuController/getDataByid?sid="+sid+"").then(res=>{
+            this.updateForm=res.data.data;
+          }).catch(err=>console.log(err));
+        },
         add(){
           console.log(this.addForm)
           var add=this.$qs.stringify(this.addForm)
