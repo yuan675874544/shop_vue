@@ -184,6 +184,13 @@
           label="属性值id"
           width="180">
         </el-table-column>
+        <el-table-column
+          prop="id"
+          label="操作">
+          <template slot-scope="scope">
+            <el-button type="danger" icon="el-icon-delete"  @click="deleteAttid(scope.row.vid)"></el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
 
@@ -362,6 +369,27 @@
             //属性值数据
             bthis.valueData = rs.data.data;
           })
+        },
+        //逻辑删除
+        deleteAttid(vid){
+          this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$ajax.post("http://127.0.0.1:8080/ShuValueController/deleteIsdel?vid="+vid+"").then(res=>{
+              // 把请求的数据  赋给全局
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+            }).catch(err=>console.log(err));
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
         }
       }, created:function () {
         this.queryType();
