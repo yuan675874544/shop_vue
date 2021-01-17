@@ -459,6 +459,16 @@
         this.updateValueForm=res.data.data;
       }).catch(err=>console.log(err));
     },
+        //修改
+        updateValue(){
+          var update=this.$qs.stringify(this.updateValueForm);
+          var uthis=this;
+          this.$ajax.post("http://127.0.0.1:8080/ShuValueController/update?"+update).then(res=>{
+            // 把请求的数据  赋给全局
+            uthis.updateValueFormFlag=false;
+            uthis.queryValue(this.attId);
+          }).catch(err=>console.log(err));
+        },
       }, created:function () {
         this.queryType();
         this.queryShuXing(1,4);
