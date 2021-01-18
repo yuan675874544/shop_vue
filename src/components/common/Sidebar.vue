@@ -71,10 +71,13 @@ export default {
                     title: '分类管理'
                   },{
                     index: 'Pin',
-                    title: '商品管理'
+                    title: '品牌管理'
                   },{
                     index: 'Shu',
                     title: '属性管理'
+                  },{
+                    index: 'Shop',
+                    title: '商品管理'
                   }
                   ]
               },

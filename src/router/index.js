@@ -31,13 +31,17 @@ export default new Router({
         },{
           path: '/Pin',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Pin.vue'),
-          meta: { title: '商品管理' }
+          meta: { title: '品牌管理' }
         },{
           path: '/Shu',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shu.vue'),
           meta: { title: '属性管理' }
-        }
 
+        },{
+          path: '/Shop',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shop.vue'),
+          meta: { title: '商品管理' }
+        }
       ]
     }
   ]
