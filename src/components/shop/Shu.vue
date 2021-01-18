@@ -5,7 +5,7 @@
         <el-form>
           名称:<el-input type="text" v-model="param.name" width="40px "></el-input>
           <el-button v-on:click="queryShuXing(1,4)">搜索</el-button>
-          <h1 align="center" >商品管理</h1>
+          <h1 align="center" >属性管理</h1>
           <el-button type="success" @click="addFormFlag=true">新增</el-button>
         </el-form>
       </div>
@@ -19,6 +19,7 @@
             label="序号"
             width="180">
           </el-table-column>
+
           <el-table-column
             prop="typeId"
             label="类型"
@@ -51,7 +52,7 @@
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit"   @click="toUpdateshuxing(scope.row.sid)"></el-button>
               <el-button type="danger" icon="el-icon-delete"  @click="deleteIsdel(scope.row.sid)"></el-button>
-              <el-button type="danger" icon="el-icon-delete" @click= "queryValue(scope.row.sid)">属性值维护</el-button>
+              <el-button type="danger" v-if="scope.row.type!=3" icon="el-icon-delete"  @click= "queryValue(scope.row)">属性值维护</el-button>
             </template>
           </el-table-column>
 
@@ -77,16 +78,13 @@
             <el-form-item label="中文名称" prop="nameCH">
               <el-input v-model="addForm.nameCH" autocomplete="off" ></el-input>
             </el-form-item>
-            <el-form-item label="分类" prop="typeId">
-              <el-select v-model="addForm.typeId" placeholder="请选择">
-                <el-option
-                  v-for="item in bandData"
-                  :key="item.iid"
-                  :label="item.name"
-                  :value="item.iid">
-                </el-option>
+            <el-form-item label="分类">
+              <el-select v-model="addForm.typeId" placeholder="请选择分类">
+                <el-option label="请选择" :value="-1"></el-option>
+                <el-option v-for="item in types" :key="item.id" :label="item.name" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
+
             <el-form-item label="类型" prop="type">
               <el-select v-model="addForm.type" placeholder="请选择">
                 <el-option
@@ -115,7 +113,7 @@
         </el-dialog>
       </div>
       <!--修改模板-->
-      <el-dialog title="属性修改信息" :visible.sync="updateFormFlag">
+      <el-dialog :title="属性修改信息" :visible.sync="updateFormFlag">
         <el-form :model="updateForm" ref="updateForm"  label-width="80px">
           <el-form-item label="英文名称" prop="name">
             <el-input v-model="updateForm.name" autocomplete="off" ></el-input>
@@ -123,14 +121,10 @@
           <el-form-item label="中文名称" prop="nameCH">
             <el-input v-model="updateForm.nameCH" autocomplete="off" ></el-input>
           </el-form-item>
-          <el-form-item label="分类" prop="typeId">
-            <el-select v-model="updateForm.typeId" placeholder="请选择">
-              <el-option
-                v-for="item in bandData"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-              </el-option>
+          <el-form-item label="分类">
+            <el-select v-model="updateForm.typeId" placeholder="请选择分类">
+              <el-option label="请选择" :value="-1"></el-option>
+              <el-option v-for="item in types" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="类型" prop="type">
@@ -159,8 +153,10 @@
           <el-button @click="updateFormFlag = false">取 消</el-button>
         </div>
       </el-dialog>
+    <div>
+
     <!--这是属性展示的模板-->
-    <el-dialog title="属性展示模板" :visible.sync="showValueFormFlag">
+    <el-dialog :title="valueTitle" :visible.sync="showValueFormFlag">
       <el-table
         :data="valueData"
         style="width: 100%">
@@ -195,11 +191,12 @@
       </el-table>
       <el-button type="primary" @click="addValueFormAalg=true">新增</el-button>
     </el-dialog>
+    </div>
     <!--属性值新增的的模板-->
 
     <div>
-      <el-dialog title="属性值新增信息" :visible.sync="addValueFormAalg">
-        <el-form :model="addValueForm"    label-width="80px">
+      <el-dialog :title="xinzeng" :visible.sync="addValueFormAalg">
+        <el-form :model="addValueForm"   :rules="valuerules" label-width="80px">
           <el-form-item label="英文名称" prop="name">
             <el-input v-model="addValueForm.name" autocomplete="off" ></el-input>
           </el-form-item>
@@ -209,13 +206,13 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button type="primary" @click="addValue">确 定</el-button>
-          <el-button @click="addValueFormFlag = false">取 消</el-button>
+          <el-button @click="addValueFormAalg = false">取 消</el-button>
         </div>
       </el-dialog>
     </div>
     <!--属性值修改的模板-->
     <div>
-      <el-dialog title="属性值修改信息" :visible.sync="updateValueFormFlag">
+      <el-dialog :title="xiougai" :visible.sync="updateValueFormFlag">
         <el-form :model="updateValueForm"    label-width="80px">
           <el-form-item label="英文名称" prop="name">
             <el-input v-model="updateValueForm.name" autocomplete="off" ></el-input>
@@ -249,10 +246,13 @@
             },
             shuxingData:[],
             //类型的数据
-            typeData:[],
+            /*  需要数据做转换   */
+            ajaxTypeData:[],
+            typeName:"",
+            types:[],
             leixngData:[{type:0,name:"下拉框"},{type:1,name:"单选框"},{type:2,name:"复选框"},{type:3,name:"输入框"}],
             /* 新增模块的数据  */
-            bandData:[],
+
             addFormFlag:false,
             addForm:{
               sid:"",
@@ -289,7 +289,10 @@
             updateValueForm:{
              name:"",
              nameCH:""
-            }
+            },
+            valueTitle:"",
+            xinzeng:"",
+            xiougai:""
           }
       },methods:{
 
@@ -362,56 +365,80 @@
           sthis.queryData(1, val);
         },
         formaTypeId(row,column,value,index){
-          for (let i = 0; i <this.typeData.length; i++) {
-            if(value==this.typeData[i].id)
-            {return this.typeData[i].name}
+          for (let i = 0; i <this.ajaxTypeData.length; i++) {
+            if(value==this.ajaxTypeData[i].id)
+            {return this.ajaxTypeData[i].name}
           }
         },
         SKU(row,column,value,index){
           return value==1?"是":"否"
-        },queryType(){
+        },
+        /* 新增相关的  */
+        // {"id":7,name:"分类/电子产品/手机"},
+        formaterTypeData:function(){
+
           this.$ajax.get("http://127.0.0.1:8080/TypeController/getData").then(res=>{
-            this.typeData=res.data.data.data;
-            for (let i = 0; i <res.data.data.data.length ; i++) {
-              if(res.data.data.data[i].pid==0){
-                this.diguiNode(res.data.data.data[i]);
+
+            // [{id:1,"name":"",pid:2},{}]
+            this.ajaxTypeData=res.data.data.data;
+            //{"id":7,name:"分类/电子产品/手机"},
+            //先找到子节点的数据   this.types;
+            this.getChildrenType();
+            //遍历所有的子节点
+            for (let i = 0; i <this.types.length ; i++) {
+              this.typeName=""; // 全局变量   临时存 层级名称
+              //处理子节点的name属性
+              this.chandleName(this.types[i]);
+              //   a/b/c/f/d/e
+              //给name重新赋值
+              this.types[i].name=this.typeName.split("/").reverse().join("/").substring(0,this.typeName.length-1);
+            }
+
+          })
+        }, //给我一个节点  得到层级name
+        chandleName:function(node){
+          if(node.pid!=0){ //临界值
+            this.typeName+="/"+node.name;
+            //上级节点
+            for (let i = 0; i <this.ajaxTypeData.length ; i++) {
+              if(node.pid==this.ajaxTypeData[i].id){
+                this.chandleName(this.ajaxTypeData[i]);
                 break;
               }
             }
-          }).catch(err=>console.log(err));
-        },diguiNode:function (node) {
-          // 判断是否为父节点
-          var bf=this.isParent(node);
-          if(bf==true){
-            for (let i = 0; i <this.typeData.length ; i++) {
-              //判断是否为当前节点的子节点
-              if(node.id==this.typeData[i].pid){
-                this.diguiNode(this.typeData[i]);
-              }
-            }
+
+          }else{
+            this.typeName+="/"+node.name;
           }
-          if(bf==false){
-            for (let i = 0; i <this.typeData.length ; i++) {
-              if(node.pid==this.typeData[i].id){
-                this.arr='{"id":'+node.id+',"name":'+'"分类/'+this.typeData[i].name+"/"+node.name+'"'+'}';
-                this.bandData.push(JSON.parse(this.arr))
-              }
-            }
-          }        },
-        isParent:function(node){
-          // 判断是否为父节点  pid 有没有指向当前id
-          for (let i = 0; i <this.typeData.length ; i++) {
-            if(node.id==this.typeData[i].pid){
-              console.log(1)
-              return true;
-            }
-          }
-          return false;
         },
-        queryValue:function(attId){
+        //得到types的数据      遍历所有ajaxtypedata
+        getChildrenType:function(){
+          //遍历所有的节点数据
+          for (let i = 0; i <this.ajaxTypeData.length ; i++) {
+            let  node=this.ajaxTypeData[i];
+            this.isChildrenNode(node);
+          }
+        },
+        isChildrenNode:function(node){
+          let rs=true; //标示
+          for (let i = 0; i <this.ajaxTypeData.length ; i++) {
+            if(node.id==this.ajaxTypeData[i].pid){
+              rs=false;
+              break;
+            }
+          }
+          if(rs==true){
+            this.types.push(node);
+          }
+        },
+        queryValue:function(row){
           //请求数据
+          var  attId=row.sid;
+          alert(row.nameCH);
+          this.valueTitle=row.nameCH+"的信息";
+          this.xinzeng=row.nameCH+"新增的信息";
+          this.xiougai=row.nameCH+"修改的信息";
           debugger
-          this.attId=attId;
           this.showValueFormFlag=true;
           var bthis = this;
           this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attId+"").then(function (rs) {
@@ -442,7 +469,6 @@
           });
         },
         addValue(){
-          alert(this.attId)
         this.addValueForm.attId=this.attId;
           var add=this.$qs.stringify(this.addValueForm)
           var athis=this;
@@ -470,7 +496,7 @@
           }).catch(err=>console.log(err));
         },
       }, created:function () {
-        this.queryType();
+        this.formaterTypeData();
         this.queryShuXing(1,4);
         this.queryValue(attId);
       }
