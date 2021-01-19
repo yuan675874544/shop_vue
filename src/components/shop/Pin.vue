@@ -4,7 +4,7 @@
       <el-form>
       名称:<el-input type="text" v-model="param.name" width="40px "></el-input>
       <el-button v-on:click="queryData(1,4)">搜索</el-button>
-      <h1 align="center" >商品管理</h1>
+      <h1 align="center" >品牌管理</h1>
       <el-button type="success" @click="addFormFlag=true">新增</el-button>
       </el-form>
       </div>
@@ -212,7 +212,7 @@
             totalPage: 0,//总条数
             pageSizes: [5, 10, 15, 20],//每页展示几条
             current: 1,  //当前也
-            size: 5, //每页展示条数
+            size: 4, //每页展示条数
             param:{},
         /* 新增模块的数据  */
         addFormFlag:false,

@@ -298,12 +298,12 @@
 
         update: function () {
           debugger
-          var athis = this;
+          var uthis = this;
           //发起请求
           this.$ajax.post("http://127.0.0.1:8080/ShuController/update",this.$qs.stringify(this.updateForm)).then(function () {
             alert("修改成功");
-            athis.updateFormFlag = false;
-            athis.queryShuXing(1,5);
+            uthis.updateFormFlag = false;
+            uthis.queryShuXing(1,5);
           }).catch(function () {
             console.log("发送请求失败");
           })
@@ -356,13 +356,14 @@
             bthis.shuxingData = rs.data.data.list;
             bthis.totalPage = rs.data.data.count;
           })
-        },    handleCurrentChange(val) {
+        },     handleCurrentChange(val) {
           var hthis = this;
-          hthis.queryData(val, hthis.param.size);
+          hthis.queryShuXing(val, hthis.param.size);
         },
         handleSizeChange(val) {
+
           var sthis = this;
-          sthis.queryData(1, val);
+          sthis.queryShuXing(1, val);
         },
         formaTypeId(row,column,value,index){
           for (let i = 0; i <this.ajaxTypeData.length; i++) {
@@ -371,10 +372,9 @@
           }
         },
         SKU(row,column,value,index){
-          return value==1?"是":"否"
+          return value==0?"是":"否"
         },
         /* 新增相关的  */
-        // {"id":7,name:"分类/电子产品/手机"},
         formaterTypeData:function(){
 
           this.$ajax.get("http://127.0.0.1:8080/TypeController/getData").then(res=>{
@@ -393,7 +393,6 @@
               //给name重新赋值
               this.types[i].name=this.typeName.split("/").reverse().join("/").substring(0,this.typeName.length-1);
             }
-
           })
         }, //给我一个节点  得到层级name
         chandleName:function(node){
@@ -433,15 +432,13 @@
         },
         queryValue:function(row){
           //请求数据
-          var  attId=row.sid;
-          alert(row.nameCH);
+          this.attId=row.sid;
           this.valueTitle=row.nameCH+"的信息";
           this.xinzeng=row.nameCH+"新增的信息";
           this.xiougai=row.nameCH+"修改的信息";
-          debugger
           this.showValueFormFlag=true;
           var bthis = this;
-          this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attId+"").then(function (rs) {
+          this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+row.sid+"").then(function (rs) {
             //属性值数据
             bthis.valueData = rs.data.data;
           })
@@ -459,7 +456,7 @@
                 type: 'success',
                 message: '删除成功!'
               });
-              this.queryValue(this.attId)
+              location.reload()
             }).catch(err=>console.log(err));
           }).catch(() => {
             this.$message({
@@ -471,11 +468,11 @@
         addValue(){
         this.addValueForm.attId=this.attId;
           var add=this.$qs.stringify(this.addValueForm)
-          var athis=this;
           this.$ajax.post("http://127.0.0.1:8080/ShuValueController/add?"+add).then(res=>{
             // 把请求的数据  赋给全局
-            athis.addValueFormFlag=false;
-            athis.queryValue(this.attId)
+            alert("新增成功")
+            this.addValueFormAalg=false;
+            location.reload()
           }).catch(err=>console.log(err));
         },
         //回显
@@ -492,12 +489,12 @@
           this.$ajax.post("http://127.0.0.1:8080/ShuValueController/update?"+update).then(res=>{
             // 把请求的数据  赋给全局
             uthis.updateValueFormFlag=false;
-            uthis.queryValue(this.attId);
+           location.reload()
           }).catch(err=>console.log(err));
         },
       }, created:function () {
         this.formaterTypeData();
-        this.queryShuXing(1,4);
+        this.queryShuXing(1,5);
         this.queryValue(attId);
       }
     }
