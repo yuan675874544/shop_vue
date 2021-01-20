@@ -81,7 +81,7 @@
                 <el-radio-group v-if="a.type==1" v-model="danxuan">
                   <el-radio v-for="b in a.values" :key="b.sid" :label="b.nameCH"></el-radio>
                 </el-radio-group>
-                <el-checkbox-group v-if="a.type==2" v-model="fx" >
+                <el-checkbox-group v-if="a.type==2" v-model="a.ckValues" @change="skuChange">
                   <el-checkbox v-for="b in a.values" :key="b.sid" :label="b.nameCH" ></el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
@@ -97,12 +97,39 @@
                 <el-radio-group v-if="a.type==1" v-model="danxuan">
                   <el-radio v-for="b in a.values" :key="b.sid" :label="b.nameCH"></el-radio>
                 </el-radio-group>
-                <el-checkbox-group v-if="a.type==2" v-model="fx" >
+                <el-checkbox-group v-if="a.type==2" v-model="a.ckValues" >
                   <el-checkbox v-for="b in a.values" :key="b.sid" :label="b.nameCH" ></el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-form-item>
-        </el-form>
+            <!-- 笛卡尔积表格-->
+            <el-table
+              v-if="tableShow"
+              :data="tableData"
+              style="width: 100%">
+
+              <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name">
+              </el-table-column>
+
+              <el-table-column
+                label="库存"
+                width="180">
+
+                <template slot-scope="scope">
+                  <el-input/>
+                </template>
+
+              </el-table-column>
+              <el-table-column
+                label="价格"
+                width="180">
+                <template slot-scope="scope">
+                  <el-input/>
+                </template>
+              </el-table-column>
+            </el-table>
+
+          </el-form>
       </div>
     </div>
 </template>
@@ -149,7 +176,13 @@
          SKUData:[], //sku属性数据
          xiala:[],
          danxuan:[],
-         fx:[]
+         /*笛卡尔积*/
+         skuCK:[], //确定sku复选框绑定的变量名
+         /*笛卡尔积表格*/
+         tableShow:false,
+        //表单列头信息
+        cols:[],//表动态列头
+         tableData:[]
        }
     },methods:{
       /*品牌*/
@@ -254,14 +287,12 @@
         this.$ajax.get("http://127.0.0.1:8080/ShuController/queryDataByTypeId?typeId="+typeId).then(res=>{
           // 所有的属性数据
           let attrDatas=res.data.data;
-
           //判断分类是否有数据   更新 参数和规格
           if(attrDatas.length>0){
             //初始化  attData      SKUData
             for (let i = 0; i <attrDatas.length ; i++) {
               //判断是否为sku属性
-              if(attrDatas[i].isSKU==0){
-
+              if(attrDatas[i].isSKU==1){
                 if(attrDatas[i].type!=3){
                   //发起请求 查询此属性对应的选项值
                   this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attrDatas[i].sid).then(res=>{
@@ -276,9 +307,11 @@
                   //发起请求 查询此属性对应的选项值
                   this.$ajax.get("http://127.0.0.1:8080/ShuValueController/queryAll?attId="+attrDatas[i].sid).then(res=>{
                     attrDatas[i].values=res.data.data;
+                    attrDatas[i].ckValues=[];
                     this.SKUData.push(attrDatas[i]);
                   })
                 }else{
+                  attrDatas[i].ckValues=[];
                   this.SKUData.push(attrDatas[i]);
                 }
               }
@@ -292,14 +325,64 @@
         })
         console.log(this.attData);
       },
+      //监听sku属性 改变事件
+      skuChange: function () {
+        console.log(this.SKUData);
+        //清空动态猎头
+        this.cols=[];
+        this.tableData=[];
+        //声明笛卡尔积的参数；
+        let dikaParams=[];
+        //判断是否要生成笛卡尔积
+        let flag = true;
+        for (let i = 0; i < this.SKUData.length; i++) {
+          //添加动态列头信息
+          this.cols.push({"id":this.SKUData[i].id,"nameCH":this.SKUData[i].nameCH,"name":this.SKUData[i].name});
+          //添加笛卡尔积的参数
+          dikaParams.push(this.SKUData[i].ckValues);
+          //判断当前sku属性   是否被选中
+          if (this.SKUData[i].ckValues.length == 0) {
+            flag=false;
+            break;
+          }
+        }
+        if (flag == true) {
+          alert("生成笛卡尔积");
+         let res =this.calcDescartes(dikaParams);
+         //遍历结果集
+          for (let i = 0; i < res.length; i++) {
+            //得到数据
+            let valuesAttr=res[i];
+            let  tableValue={};
+            for (let j = 0; j <valuesAttr.length ; j++) {
+              let key=this.cols[j].name;
+              tableValue[key]=valuesAttr[j];
+            }
+            this.tableData.push(tableValue);
+          }
 
+        }
+        this.tableShow=flag;
 
+      },calcDescartes:function(array) {
+        if (array.length < 2) return array[0] || [];
+        return [].reduce.call(array, function (col, set) {
+          var res = [];
+          col.forEach(function (c) {
+            set.forEach(function (s) {
+              var t = [].concat(Array.isArray(c) ? c : [c]);
+              t.push(s);
+              res.push(t);
+            })
+          });
+          return res;
+        });
+      }
     }, created:function () {
       this.formaterTypeData();
       this.queryData();
     }
     }
-
 </script>
 
 <style scoped>
