@@ -77,7 +77,7 @@ export default {
                     title: '属性管理'
                   },{
                     index: 'Shop',
-                    title: '商品管理'
+                    title: '添加商品'
                   }
                   ]
               },
