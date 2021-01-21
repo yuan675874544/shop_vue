@@ -2,7 +2,9 @@
   <div align="center">
     <div style="width: 200px" >
       <el-form>
-        <h1 align="center" >商品展示</h1>
+        名称:<el-input type="text" v-model="param.name" width="40px "></el-input>
+        <el-button v-on:click="queryData(1,4)">搜索</el-button>
+        <h1 align="center" >商品管理</h1>
       </el-form>
     </div>
     <div id="ShopTable">
@@ -39,7 +41,7 @@
         <el-table-column
           prop="price"
           label="价格"
-          width="180">
+          width="80">
         </el-table-column>
         <el-table-column
           prop="imgPath"
@@ -50,7 +52,6 @@
             <img width="50px" :src="scope.row.imgPath"/>
           </template>
         </el-table-column>
-
         <el-table-column
           label="操作"
         >
@@ -133,7 +134,9 @@
             pageSizes: [5, 10, 15, 20],//每页展示几条
             current: 1,  //当前也
             size: 4, //每页展示条数
-            param:{},
+            param:{
+              name:"",
+            },
             /*修改*/
             brandDatas:[],
             updateFormFlag:false,
