@@ -240,7 +240,7 @@
             totalPage: 0,//总条数
             pageSizes: [5, 10, 15, 20],//每页展示几条
             current: 1,  //当前也
-            size: 5, //每页展示条数
+            size: 4, //每页展示条数
             param:{
               name:""
             },
@@ -303,7 +303,7 @@
           this.$ajax.post("http://127.0.0.1:8080/ShuController/update",this.$qs.stringify(this.updateForm)).then(function () {
             alert("修改成功");
             uthis.updateFormFlag = false;
-            uthis.queryShuXing(1,5);
+            uthis.queryShuXing(1,4);
           }).catch(function () {
             console.log("发送请求失败");
           })
@@ -378,8 +378,6 @@
         formaterTypeData:function(){
 
           this.$ajax.get("http://127.0.0.1:8080/TypeController/getData").then(res=>{
-
-            // [{id:1,"name":"",pid:2},{}]
             this.ajaxTypeData=res.data.data.data;
             //{"id":7,name:"分类/电子产品/手机"},
             //先找到子节点的数据   this.types;
@@ -394,7 +392,8 @@
               this.types[i].name=this.typeName.split("/").reverse().join("/").substring(0,this.typeName.length-1);
             }
           })
-        }, //给我一个节点  得到层级name
+        },
+        //给我一个节点  得到层级name
         chandleName:function(node){
           if(node.pid!=0){ //临界值
             this.typeName+="/"+node.name;
@@ -419,7 +418,7 @@
           }
         },
         isChildrenNode:function(node){
-          let rs=true; //标示
+          let rs=true;
           for (let i = 0; i <this.ajaxTypeData.length ; i++) {
             if(node.id==this.ajaxTypeData[i].pid){
               rs=false;
@@ -494,7 +493,7 @@
         },
       }, created:function () {
         this.formaterTypeData();
-        this.queryShuXing(1,5);
+        this.queryShuXing(1,4);
         this.queryValue(attId);
       }
     }
