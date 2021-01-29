@@ -493,7 +493,7 @@
         },
       }, created:function () {
         this.formaterTypeData();
-        this.queryShuXing(1,4);
+        this.queryShuXing(1,5);
         this.queryValue(attId);
       }
     }

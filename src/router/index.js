@@ -10,10 +10,10 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-
     {
       path: '/',
-      redirect: '/test'
+      component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Login.vue'),
+      meta: { title: '登录' }
     },
     {
       path: '/',
